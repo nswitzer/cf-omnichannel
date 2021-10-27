@@ -1,0 +1,391 @@
+{
+    "name": "CF Omnichannel",
+    "flow": [
+        {
+            "id": 1,
+            "module": "gateway:CustomWebHook",
+            "version": 1,
+            "parameters": {
+                "hook": 1094079,
+                "maxResults": 2
+            },
+            "mapper": {},
+            "metadata": {
+                "designer": {
+                    "x": 0,
+                    "y": 150
+                },
+                "restore": {
+                    "hook": {
+                        "label": "Hacky Halloween listener"
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "hook",
+                        "type": "hook",
+                        "label": "Webhook",
+                        "required": true
+                    },
+                    {
+                        "name": "maxResults",
+                        "type": "number",
+                        "label": "Maximum number of results"
+                    }
+                ],
+                "interface": []
+            }
+        },
+        {
+            "id": 3,
+            "module": "builtin:BasicRouter",
+            "version": 1,
+            "mapper": null,
+            "metadata": {
+                "designer": {
+                    "x": 300,
+                    "y": 150
+                }
+            },
+            "routes": [
+                {
+                    "flow": [
+                        {
+                            "id": 2,
+                            "module": "twitter:createTweet",
+                            "version": 5,
+                            "parameters": {
+                                "__IMTCONN__": 2998395
+                            },
+                            "filter": {
+                                "name": "Send to Twitter",
+                                "conditions": [
+                                    [
+                                        {
+                                            "a": "{{1.fields.publishToTwitter.`en-US`}}",
+                                            "b": "true",
+                                            "o": "text:equal"
+                                        }
+                                    ]
+                                ]
+                            },
+                            "mapper": {
+                                "status": "We have a new post! Check it out: {{1.fields.postName.`en-US`}} https://colorful-demo-fintech-avfa9i8q8-colorful-team.vercel.app/en/post/{{1.fields.slug.`en-US`}}",
+                                "select": "image",
+                                "possibly_sensitive": false,
+                                "display_coordinates": true
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 600,
+                                    "y": 0
+                                },
+                                "restore": {
+                                    "__IMTCONN__": {
+                                        "label": "HH Twitter (Hacky Halloween Tweeter)"
+                                    },
+                                    "select": {
+                                        "label": "Image or GIF"
+                                    },
+                                    "display_coordinates": {
+                                        "mode": "chose"
+                                    },
+                                    "attachments": {
+                                        "mode": "chose",
+                                        "items": []
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "__IMTCONN__",
+                                        "type": "account",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "status",
+                                        "type": "text",
+                                        "label": "Status",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "select",
+                                        "type": "select",
+                                        "label": "Upload",
+                                        "validate": {
+                                            "enum": [
+                                                "image",
+                                                "video"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "possibly_sensitive",
+                                        "type": "boolean",
+                                        "label": "Attached images contain sensitive content (nudity, violence, etc).",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "lat",
+                                        "type": "number",
+                                        "label": "Geographic Latitude",
+                                        "validate": {
+                                            "max": 90,
+                                            "min": -90
+                                        }
+                                    },
+                                    {
+                                        "name": "long",
+                                        "type": "number",
+                                        "label": "Geographic Longitude",
+                                        "validate": {
+                                            "max": 180,
+                                            "min": -180
+                                        }
+                                    },
+                                    {
+                                        "name": "display_coordinates",
+                                        "type": "boolean",
+                                        "label": "Display tweets coordinates",
+                                        "required": true
+                                    },
+                                    {
+                                        "name": "attachments",
+                                        "spec": [
+                                            {
+                                                "name": "filename",
+                                                "type": "filename",
+                                                "label": "File Name",
+                                                "semantic": "file:name"
+                                            },
+                                            {
+                                                "name": "data",
+                                                "type": "buffer",
+                                                "label": "Data",
+                                                "semantic": "file:data"
+                                            },
+                                            {
+                                                "name": "media_category",
+                                                "type": "select",
+                                                "label": "Media Category",
+                                                "options": [
+                                                    {
+                                                        "label": "Tweet Gif",
+                                                        "value": "tweet_gif"
+                                                    },
+                                                    {
+                                                        "label": "Tweet Image",
+                                                        "value": "tweet_image"
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        "type": "array",
+                                        "label": "Attachments",
+                                        "validate": {
+                                            "maxItems": 4
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "flow": [
+                        {
+                            "id": 4,
+                            "module": "slack:CreateMessage",
+                            "version": 4,
+                            "parameters": {
+                                "__IMTCONN__": 2998426
+                            },
+                            "filter": {
+                                "name": "Send to Slack",
+                                "conditions": [
+                                    [
+                                        {
+                                            "a": "{{1.fields.publishToSlack.`en-US`}}",
+                                            "b": "true",
+                                            "o": "text:equal"
+                                        }
+                                    ]
+                                ]
+                            },
+                            "mapper": {
+                                "text": "We have a new post! {{1.fields.postName.`en-US`}}",
+                                "parse": false,
+                                "mrkdwn": true,
+                                "channel": "C02KBK51FLL",
+                                "channelType": "public",
+                                "channelWType": "list"
+                            },
+                            "metadata": {
+                                "designer": {
+                                    "x": 600,
+                                    "y": 300
+                                },
+                                "restore": {
+                                    "parse": {
+                                        "mode": "chose"
+                                    },
+                                    "mrkdwn": {
+                                        "mode": "chose"
+                                    },
+                                    "channel": {
+                                        "mode": "chose",
+                                        "label": "webhook_response"
+                                    },
+                                    "link_names": {
+                                        "mode": "chose"
+                                    },
+                                    "__IMTCONN__": {
+                                        "label": "HH bot (integromat)"
+                                    },
+                                    "channelType": {
+                                        "label": "Public channel"
+                                    },
+                                    "channelWType": {
+                                        "label": "Select from the list"
+                                    },
+                                    "unfurl_links": {
+                                        "mode": "chose"
+                                    },
+                                    "unfurl_media": {
+                                        "mode": "chose"
+                                    },
+                                    "reply_broadcast": {
+                                        "mode": "chose"
+                                    }
+                                },
+                                "parameters": [
+                                    {
+                                        "name": "__IMTCONN__",
+                                        "type": "account",
+                                        "label": "Connection",
+                                        "required": true
+                                    }
+                                ],
+                                "expect": [
+                                    {
+                                        "name": "channelWType",
+                                        "type": "select",
+                                        "label": "Enter a channel ID or name",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "manualy",
+                                                "list"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "text",
+                                        "type": "text",
+                                        "label": "Text",
+                                        "multiline": true
+                                    },
+                                    {
+                                        "name": "blocks",
+                                        "type": "text",
+                                        "label": "Blocks",
+                                        "multiline": true
+                                    },
+                                    {
+                                        "name": "thread_ts",
+                                        "type": "text",
+                                        "label": "Thread message ID (time stamp)"
+                                    },
+                                    {
+                                        "name": "reply_broadcast",
+                                        "type": "boolean",
+                                        "label": "Reply broadcast"
+                                    },
+                                    {
+                                        "name": "link_names",
+                                        "type": "boolean",
+                                        "label": "Link names"
+                                    },
+                                    {
+                                        "name": "parse",
+                                        "type": "boolean",
+                                        "label": "Parse message text"
+                                    },
+                                    {
+                                        "name": "mrkdwn",
+                                        "type": "boolean",
+                                        "label": "Use markdown"
+                                    },
+                                    {
+                                        "name": "unfurl_links",
+                                        "type": "boolean",
+                                        "label": "Unfurl primarily text-based content"
+                                    },
+                                    {
+                                        "name": "unfurl_media",
+                                        "type": "boolean",
+                                        "label": "Unfurl media content"
+                                    },
+                                    {
+                                        "name": "icon_emoji",
+                                        "type": "text",
+                                        "label": "Icon emoji"
+                                    },
+                                    {
+                                        "name": "icon_url",
+                                        "type": "url",
+                                        "label": "Icon url"
+                                    },
+                                    {
+                                        "name": "username",
+                                        "type": "text",
+                                        "label": "User name"
+                                    },
+                                    {
+                                        "name": "channelType",
+                                        "type": "select",
+                                        "label": "Channel type",
+                                        "required": true,
+                                        "validate": {
+                                            "enum": [
+                                                "public",
+                                                "private",
+                                                "im",
+                                                "mpim"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "name": "channel",
+                                        "type": "select",
+                                        "label": "Public channel",
+                                        "required": true
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "version": 1,
+        "scenario": {
+            "roundtrips": 1,
+            "shatter": false,
+            "maxErrors": 3,
+            "autoCommit": false,
+            "sequential": false,
+            "confidential": false,
+            "dataloss": false,
+            "dlq": false
+        },
+        "designer": {
+            "orphans": []
+        },
+        "zone": "eu1.integromat.com"
+    }
+}
